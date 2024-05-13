@@ -1,9 +1,13 @@
 //This sets up the express app to run and allows access to its methods and objects
 let express = require('express');
 let app = express();
-require('dotenv').config();
+
+let dotEnv = require('dotenv').config();
+let bodyParser = require('body-parser');
 
 
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 //this is another example of middleware function
 //it is placed at the top so that it logs at the...
 //...beginning of the app. Notice the use of three
@@ -26,9 +30,9 @@ console.log("Hello World!")
 //common handler is seen below
 //also uses res.send() to send the string
 
-// app.get("/", function(req, res) {
-//     res.send("Hello Express");
-// })
+app.get("/", function(req, res) {
+    res.send("Hello Express");
+})
 
 
 //this function uses res.sendFile() and the __dirname
@@ -56,6 +60,42 @@ app.get("/json", function(req, res){
         res.json({"message": "Hello json"});
     }
 });
+//This is an example of chain middleware. It is a time server 
+//the first middleware example requests the time...
+//...using the Date() and converts it with toString()...
+//...the second middleware function responds with the time
+app.get('/now', function(req, res, next) {
+    req.time = new Date().toString(); 
+    next();
+}, function(req, res) {
+    res.send({time: req.time})
+}
+);
+
+//this is using a route parameter in the PATH and the HANDLER...
+//requests an echo word and responds with a JSON word
+app.get('/:word/echo', function(req, res){
+    // let echoStr = req.params.word;
+    res.json({echo: `${req.params.word}`});
+  })
+
+//this is a query parameter input function
+//it encodes the query using '?', is paired in...
+//...'field=value' couples formate. The couples...
+//...are seperated with a '&'.
+
+app.get('/name', function(req, res){
+    let fName = req.query.first;
+    let lName = req.query.last;
+    res.json({name: `${fName} ${lName}`})
+  })
+  
+app.post('/name', function(req, res){
+    let fName = req.body.first;
+    let lName = req.body.last;
+    res.json({name: `${fName} ${lName}`})
+})
+ 
 
 
 
